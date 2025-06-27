@@ -1,12 +1,12 @@
 version: '2'
 services:
-  ed-pyspark-jupyter:
+  pyspark.jupyter.easewithdata:
     image: easewithdata/pyspark-jupyter-lab
     user: root
-    container_name: ed-pyspark-jupyter-lab
+    container_name: pyspark.jupyter.easewithdata
     ports:
-      - 8888:8888
-      - 4040:4040
+      - ${EASEWITHDATA_PYSPARK_JUPYTER_BIND:-127.0.0.1:8888}:8888
+      - ${EASEWITHDATA_SPARK_UI_BIND:-127.0.0.1:4040}:4040
     environment:
       JUPYTER_PORT: 8888
       SPARK_UI_PORT: 4040
@@ -14,28 +14,28 @@ services:
     volumes:
       - streaming_data:/data:rw
 
-  ed-zookeeper:
+  zookeeper.easewithdata:
     image: confluentinc/cp-zookeeper:latest
-    container_name: ed-zookeeper
-    ports:
-      - 2181:2181
+    container_name: zookeeper.easewithdata
+    # ports:
+    #   - 2181:2181
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
-  ed-kafka:
+  kafka.easewithdata:
     image: confluentinc/cp-kafka:latest
-    container_name: ed-kafka
+    container_name: kafka.easewithdata
     depends_on:
-      - ed-zookeeper
-    ports:
-      - 9092:9092
+      - zookeeper.easewithdata
+    # ports:
+    #   - 9092:9092
     volumes:
       - streaming_data:/data:rw
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: ed-zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://ed-kafka:29092,PLAINTEXT_HOST://127.0.0.1:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper.easewithdata:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka.easewithdata:29092,PLAINTEXT_HOST://127.0.0.1:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
